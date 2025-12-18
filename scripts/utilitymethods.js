@@ -1,74 +1,180 @@
-var UtilityMethods = (function () {
-    function UtilityMethods() {
+var DiagramClientSideEvent = require("./events.js")
+var  DiagramClientSideEvents = new DiagramClientSideEvent();
+
+var PageSettings = (function () {
+    function PageSettings() {
+      this.pageWidth = 1056;
+      this.pageHeight = 816;
+      this.backgroundColor = '#ffffff';
+      this.isPortrait = false;
+      this.isLandscape = true;
+      this.paperSize = 'Letter';
+      this.pageBreaks = false;
+    }
+    return PageSettings;
+  }());
+  
+var pageSettings = new PageSettings();
+
+var PrintSettings = (function () {
+    function PrintSettings() {
+        this.m_region = 'PageSettings';
+        this.m_pageWidth = 0;
+        this.m_pageHeight = 0;
+        this.m_isPortrait = true;
+        this.m_isLandscape = false;
+        this.m_multiplePage = false;
+        this.m_paperSize = 'Letter';
+    }
+    Object.defineProperty(PrintSettings.prototype, "region", {
+        get: function () {
+            return this.m_region;
+        },
+        set: function (region) {
+            this.m_region = region;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PrintSettings.prototype, "pageWidth", {
+        get: function () {
+            return this.m_pageWidth;
+        },
+        set: function (pageWidth) {
+            this.m_pageWidth = pageWidth;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PrintSettings.prototype, "pageHeight", {
+        get: function () {
+            return this.m_pageHeight;
+        },
+        set: function (pageHeight) {
+            this.m_pageHeight = pageHeight;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PrintSettings.prototype, "isPortrait", {
+        get: function () {
+            return this.m_isPortrait;
+        },
+        set: function (isPortrait) {
+            this.m_isPortrait = isPortrait;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PrintSettings.prototype, "isLandscape", {
+        get: function () {
+            return this.m_isLandscape;
+        },
+        set: function (isLandscape) {
+            this.m_isLandscape = isLandscape;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PrintSettings.prototype, "multiplePage", {
+        get: function () {
+            return this.m_multiplePage;
+        },
+        set: function (multiplePage) {
+            this.m_multiplePage = multiplePage;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(PrintSettings.prototype, "paperSize", {
+        get: function () {
+            return this.m_paperSize;
+        },
+        set: function (paperSize) {
+            this.m_paperSize = paperSize;
+            document.getElementById('printCustomSize').style.display = 'none';
+            document.getElementById('printOrientation').style.display = 'none';
+            if (paperSize === 'Custom') {
+                document.getElementById('printCustomSize').style.display = '';
+            }
+            else {
+                document.getElementById('printOrientation').style.display = '';
+            }
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return PrintSettings;
+}());
+
+var printSettings = new PrintSettings();
+
+class UtilityMethods {
+    constructor () {
     };
-    UtilityMethods.prototype.toolbarClick = function(args)
+    PaperSize   () {
+        function PaperSize() {
+        }
+        return PaperSize;
+    };
+    toolbarClick (args)
     {
         let item = args.item.tooltipText;
-        // var zoomCurrentValue = document.getElementById("btnZoomIncrement").ej2_instances[0];
         switch(item)
         {
-            case 'Undo':
-                diagram.undo();
-                break;
-            case 'Redo':
-                diagram.redo();
-                break;
             case 'Zoom In(Ctrl + +)':
-                diagram.zoomTo({ type: 'ZoomIn', zoomFactor: 0.2 });
-                zoomCurrentValue.content = diagram.scrollSettings.currentZoom = (diagram.scrollSettings.currentZoom * 100).toFixed() + '%';
+                diagram.ej2_instances[0].zoomTo({ type: 'ZoomIn', zoomFactor: 0.2 });
+                zoomCurrentValue.content = diagram.ej2_instances[0].scrollSettings.currentZoom = (diagram.ej2_instances[0].scrollSettings.currentZoom * 100).toFixed() + '%';
                 break;
             case 'Zoom Out(Ctrl + -)':
-                diagram.zoomTo({ type: 'ZoomOut', zoomFactor: 0.2 });
-                zoomCurrentValue.content = diagram.scrollSettings.currentZoom = (diagram.scrollSettings.currentZoom * 100).toFixed() + '%';
+                diagram.ej2_instances[0].zoomTo({ type: 'ZoomOut', zoomFactor: 0.2 });
+                zoomCurrentValue.content = diagram.ej2_instances[0].scrollSettings.currentZoom = (diagram.ej2_instances[0].scrollSettings.currentZoom * 100).toFixed() + '%';
                 break;
             case 'Lock':
                 lockObject();
                 break;
             case 'Cut':
-                diagram.cut();
+                diagram.ej2_instances[0].cut();
                 break;
             case 'Copy':
-                diagram.copy();
+                diagram.ej2_instances[0].copy();
                 break;
             case 'Paste':
-                diagram.paste();
+                diagram.ej2_instances[0].paste();
                 break;
             case'Delete':
-                 diagram.remove();
+                 diagram.ej2_instances[0].remove();
                 break;
             case 'Select Tool':
-                diagram.clearSelection();
-                // diagram.drawingObject = {};
-                diagram.tool = ej.diagrams.DiagramTools.Default;
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.Default;
                 break;
             case 'Text Tool':
-                // diagram.clearSelection();
-                diagram.selectedItems.userHandles = [];
-                diagram.drawingObject = { shape: { type: 'Text' }, };
-                diagram.tool = ej.diagrams.DiagramTools.ContinuousDraw;
+                diagram.ej2_instances[0].selectedItems.userHandles = [];
+                diagram.ej2_instances[0].drawingObject = { shape: { type: 'Text' }, };
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools;
                 break;
             case 'Pan Tool':
-                diagram.clearSelection()
-                // diagram.drawingObject = {};
-                diagram.tool = ej.diagrams.DiagramTools.ZoomPan;
+                diagram.ej2_instances[0].clearSelection()
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.ZoomPan;
                 break;
             case 'Rotate Clockwise':
-                diagram.rotate(diagram.selectedItems,90);
+                diagram.ej2_instances[0].rotate(diagram.ej2_instances[0].selectedItems,90);
                 break;
             case 'Rotate Counter-clockwise':
-                diagram.rotate(diagram.selectedItems,-90);
+                diagram.ej2_instances[0].rotate(diagram.ej2_instances[0].selectedItems,-90);
                 break;
             case 'Bring To Front':
-                diagram.bringToFront();
+                diagram.ej2_instances[0].bringToFront();
                 break;
             case 'Send To Back':
-                diagram.sendToBack();
+                diagram.ej2_instances[0].sendToBack();
                 break;
             case 'Bring Forward':
-                diagram.moveForward();
+                diagram.ej2_instances[0].moveForward();
                 break;
             case 'Send Backward':
-                diagram.sendBackward();
+                diagram.ej2_instances[0].sendBackward();
                 break;
             case 'Align Left':
             case 'Align Right':
@@ -76,46 +182,42 @@ var UtilityMethods = (function () {
             case 'Align Bottom':
             case 'Align Middle':
             case 'Align Center':
-                // selectedItem.isModified = true;
                 var alignType = item.replace('Align', '');
                 var alignType1 = alignType.charAt(0).toUpperCase() + alignType.slice(1);
-                diagram.align(alignType1.trim());
+                diagram.ej2_instances[0].align(alignType1.trim());
                 break;
             case 'Distribute Objects Horizontally':
-                diagram.distribute('RightToLeft');
+                diagram.ej2_instances[0].distribute('RightToLeft');
                 break;
             case 'Distribute Objects Vertically':
-                diagram.distribute('BottomToTop');
+                diagram.ej2_instances[0].distribute('BottomToTop');
                 break;
              case 'Group':
-                diagram.group();
+                diagram.ej2_instances[0].group();
                 args.item.prefixIcon = 'sf-icon-ungroup';
                 args.item.tooltipText = 'UnGroup';
                 break;
             case 'UnGroup':
-                diagram.unGroup();
+                diagram.ej2_instances[0].unGroup();
                 args.item.prefixIcon = 'sf-icon-group';
                 args.item.tooltipText = 'Group';
                 break;
             case 'Fill Color':
-                var objColor = diagram.selectedItems.nodes[0]? 'nodeFillColor':'lineColor'
+                var objColor = diagram.ej2_instances[0].selectedItems.nodes[0]? 'nodeFillColor':'lineColor'
                 this.showColorPicker(objColor,'tb-item-stroke');
                 break;
             case 'Font Color':
                 this.showColorPicker('textColor','tb-item-stroke');
                 break;
             case 'New Diagram':
-                diagram.clear();
-                DiagramClientSideEvents.prototype.historyChange();
-                break;
-            case 'Print Diagram':
-                printDialog.show();
+                diagram.ej2_instances[0].clear();
+                DiagramClientSideEvents.historyChange();
                 break;
             case 'Export Diagram':
-                exportDialog.show();
+                exportDialog.ej2_instances[0].show();
                 break;
             case 'Save Diagram':
-                this.download(diagram.saveDiagram());
+                this.download(diagram.ej2_instances[0].saveDiagram());
                 break;
             case 'Open Diagram':
                 document.getElementsByClassName('e-file-select-wrap')[0].querySelector('button').click();
@@ -127,15 +229,15 @@ var UtilityMethods = (function () {
                 flipObjects(item);
                 break;
         }
-        if (item === 'Select Tool' || item === 'Pan Tool' || item === 'Text Tool' ) {
+        if (item === 'Select Tool' || item === 'Pan Tool' || item === 'Text Tool' || item === 'Draw Connectors') {
             if (args.item.cssClass.indexOf('tb-item-selected') === -1) {
                 this.removeSelectedToolbarItem();
                 args.item.cssClass += ' tb-item-selected';
             }
         }
-        diagram.dataBind();
+        diagram.ej2_instances[0].dataBind();
      };
-    UtilityMethods.prototype.menuClick = function(args)
+    menuClick (args)
     {
         var buttonElement = document.getElementsByClassName('e-btn-hover')[0];
         if (buttonElement) {
@@ -145,46 +247,41 @@ var UtilityMethods = (function () {
         switch(option)
         {
             case 'New':
-                diagram.clear();
-                DiagramClientSideEvents.prototype.historyChange();
+                diagram.ej2_instances[0].clear();
+                DiagramClientSideEvents.historyChange();
                 break;
             case 'Save':
-                this.download(diagram.saveDiagram());
+                this.download(diagram.ej2_instances[0].saveDiagram());
                 break;
             case 'Print':
-                printSettings.pageHeight = pageSettings.pageHeight;
-                printSettings.pageWidth = pageSettings.pageWidth;
-                printSettings.paperSize = pageSettings.paperSize;
-                printSettings.isPortrait = pageSettings.isPortrait;
-                printSettings.isLandscape = !pageSettings.isPortrait;
-                printDialog.show();
+                this.btnPrintClick();
                 break;
             case 'Export':
-                exportDialog.show();
+                exportDialog.ej2_instances[0].show();
                 break;
             case 'Open':
                 document.getElementsByClassName('e-file-select-wrap')[0].querySelector('button').click();
                 break;
             case 'Undo':
-                diagram.undo();
+                diagram.ej2_instances[0].undo();
                 break;
             case 'Redo':
-                diagram.redo();
+                diagram.ej2_instances[0].redo();
                 break;
             case 'Cut':
-                diagram.cut();
+                diagram.ej2_instances[0].cut();
                 break;
             case 'Copy':
-                diagram.copy();
+                diagram.ej2_instances[0].copy();
                 break;
             case 'Paste':
-                diagram.paste();
+                diagram.ej2_instances[0].paste();
                 break;
             case 'Rotate Right 90':
-                diagram.rotate(diagram.selectedItems,90);
+                diagram.ej2_instances[0].rotate(diagram.ej2_instances[0].selectedItems,90);
                 break;
             case 'Rotate Left 90':
-                diagram.rotate(diagram.selectedItems,-90);
+                diagram.ej2_instances[0].rotate(diagram.ej2_instances[0].selectedItems,-90);
                 break;
             case 'Flip Vertical':
                 flipObjects(option);
@@ -193,28 +290,28 @@ var UtilityMethods = (function () {
                 flipObjects(option);
                 break;
             case 'Delete':
-                diagram.remove();
+                diagram.ej2_instances[0].remove();
             case 'Send To Back':
-                diagram.sendToBack();
+                diagram.ej2_instances[0].sendToBack();
                 break;
             case 'Bring To Front':
-                diagram.bringToFront();
+                diagram.ej2_instances[0].bringToFront();
                 break;
             case 'Send Backward':
-                diagram.sendBackward();
+                diagram.ej2_instances[0].sendBackward();
                 break;
             case 'Bring Forward':
-                diagram.moveForward();
+                diagram.ej2_instances[0].moveForward();
                 break;
             case 'Landscape':
                 args.item.parentObj.items[1].iconCss = '';
                 args.item.iconCss = 'sf-icon-check-tick';
-                diagram.pageSettings.orientation = 'Landscape';
+                diagram.ej2_instances[0].pageSettings.orientation = 'Landscape';
                 break;
             case 'Portrait':
                 args.item.parentObj.items[0].iconCss = '';
                 args.item.iconCss = 'sf-icon-check-tick';
-                diagram.pageSettings.orientation = 'Portrait';
+                diagram.ej2_instances[0].pageSettings.orientation = 'Portrait';
                 break;
             case 'Letter (8.5 in x 11 in)':
             case 'Legal (8.5 in x 14 in)':
@@ -224,109 +321,108 @@ var UtilityMethods = (function () {
             case 'A6 (105 mm x 148 mm)':
             case 'Tabloid (279 mm x 432 mm)':
                 this.paperListChange(args)
-                pageSettingsList.text = args.item.text;
                 this.updateSelection(args.item)
                 break;
             case 'Select All':
-                diagram.clearSelection();
-                diagram.selectAll();
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].selectAll();
                 break;
             case 'Select All Nodes':
-                diagram.clearSelection();
-                diagram.select(diagram.nodes);
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].select(diagram.ej2_instances[0].nodes);
                 break;
             case 'Select All Connectors':
-                diagram.clearSelection();
-                diagram.select(diagram.connectors);
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].select(diagram.ej2_instances[0].connectors);
                 break;
             case 'Deselect All':
-                diagram.clearSelection();
+                diagram.ej2_instances[0].clearSelection();
                 break;
             case 'Selection Tool':
-                diagram.tool = ej.diagrams.DiagramTools.Default;
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.Default;
                 this.removeSelectedToolbarItem();
                 break;
             case 'Pan Tool':
-                diagram.clearSelection();
-                diagram.tool = ej.diagrams.DiagramTools.ZoomPan;
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.ZoomPan;
                 this.removeSelectedToolbarItem();
                 break;
             case 'Orthogonal':
-                diagram.clearSelection();
-                diagram.drawingObject.sourceID = '';
-                diagram.tool = ej.diagrams.DiagramTools.ContinuousDraw;
-                diagram.selectedItems.userHandles = [];
-                diagram.drawingObject.type = 'Orthogonal';
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].drawingObject.sourceID = '';
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.ContinuousDraw;
+                diagram.ej2_instances[0].selectedItems.userHandles = [];
+                diagram.ej2_instances[0].drawingObject.type = 'Orthogonal';
                 this.removeSelectedToolbarItem();
                 break;
             case 'Straight':
-                diagram.clearSelection();
-                diagram.drawingObject.sourceID = '';
-                diagram.tool = ej.diagrams.DiagramTools.ContinuousDraw;
-                diagram.selectedItems.userHandles = [];
-                diagram.drawingObject.type = 'Straight';
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].drawingObject.sourceID = '';
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.ContinuousDraw;
+                diagram.ej2_instances[0].selectedItems.userHandles = [];
+                diagram.ej2_instances[0].drawingObject.type = 'Straight';
                 this.removeSelectedToolbarItem();
                 break;
             case 'Bezier':
-                diagram.clearSelection();
-                diagram.drawingObject.sourceID = '';
-                diagram.tool = ej.diagrams.DiagramTools.ContinuousDraw;
-                diagram.selectedItems.userHandles = [];
-                diagram.drawingObject.type = 'Bezier';
+                diagram.ej2_instances[0].clearSelection();
+                diagram.ej2_instances[0].drawingObject.sourceID = '';
+                diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.ContinuousDraw;
+                diagram.ej2_instances[0].selectedItems.userHandles = [];
+                diagram.ej2_instances[0].drawingObject.type = 'Bezier';
                 this.removeSelectedToolbarItem();
                 break;
             case 'Show Lines':
-                diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ ej.diagrams.SnapConstraints.ShowLines;
+                diagram.ej2_instances[0].snapSettings.constraints = diagram.ej2_instances[0].snapSettings.constraints ^ ej.diagrams.SnapConstraints.ShowLines;
                 args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
                 break;
             case 'Snap To Grid':
-                diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ ej.diagrams.SnapConstraints.SnapToLines;
+                diagram.ej2_instances[0].snapSettings.constraints = diagram.ej2_instances[0].snapSettings.constraints ^ ej.diagrams.SnapConstraints.SnapToLines;
                 args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
                 break;
             case 'Snap To Object':
-                diagram.snapSettings.constraints = diagram.snapSettings.constraints ^ ej.diagrams.SnapConstraints.SnapToObject;
+                diagram.ej2_instances[0].snapSettings.constraints = diagram.ej2_instances[0].snapSettings.constraints ^ ej.diagrams.SnapConstraints.SnapToObject;
                 args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
                 break;
             case 'Show Ruler':
                 args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
-                diagram.rulerSettings.showRulers = !diagram.rulerSettings.showRulers;
+                diagram.ej2_instances[0].rulerSettings.showRulers = !diagram.ej2_instances[0].rulerSettings.showRulers;
                 break;
             case 'Show Page Breaks':
                 args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
-                diagram.pageSettings.showPageBreaks = !diagram.pageSettings.showPageBreaks;
-                //showPageBreaks.checked = !showPageBreaks.checked;
+                diagram.ej2_instances[0].pageSettings.showPageBreaks = !diagram.ej2_instances[0].pageSettings.showPageBreaks;
                 break;
             case 'Show Multiple page':
                 args.item.iconCss = args.item.iconCss ? '' : 'sf-icon-check-tick';
-                diagram.pageSettings.multiplePage = ! diagram.pageSettings.multiplePage;
+                diagram.ej2_instances[0].pageSettings.multiplePage = ! diagram.ej2_instances[0].pageSettings.multiplePage;
                 break;
             case 'Fit To Width':
-                diagram.fitToPage({mode:'Width'});
+                diagram.ej2_instances[0].fitToPage({mode:'Width'});
                 break;
             case 'Fit To Page':
-                diagram.fitToPage({ mode: 'Page', region: 'Content'});
+                diagram.ej2_instances[0].fitToPage({ mode: 'Page', region: 'Content'});
                 break;
         }
         if (option === 'Pan Tool') {
+            var toolbarObj = document.getElementById('toolbarObj').ej2_instances[0];
             if (toolbarObj.items[3].cssClass.indexOf('tb-item-selected') === -1) {
                 toolbarObj.items[3].cssClass += ' tb-item-selected';
             }
         }
        else if (option === 'Selection Tool') {
+        var toolbarObj = document.getElementById('toolbarObj').ej2_instances[0];
             if (toolbarObj.items[4].cssClass.indexOf('tb-item-selected') === -1) {
                 toolbarObj.items[4].cssClass += ' tb-item-selected';
             }
         }
-        else if (option ===  'Orthogonal' || option === 'Straight' || option === 'Bezier') {
-            document.getElementById('conTypeBtn').classList.add('tb-item-selected');
-        }
-        diagram.dataBind();
+        
+        diagram.ej2_instances[0].dataBind();
     };
-    UtilityMethods.prototype.onClickDisable = function(args)
+   onClickDisable (args)
     {
         if(args === false)
         {
-            for(i=8;i<29;i++)
+            var toolbarObj = document.getElementById('toolbarObj').ej2_instances[0];
+            for(var i=8;i<29;i++)
             {
                 if(toolbarObj.items[i].type !=='Separator'){
                     if(i<=17)
@@ -340,7 +436,8 @@ var UtilityMethods = (function () {
             }
         }
         else{
-            for(i=8;i<29;i++)
+            var toolbarObj = document.getElementById('toolbarObj').ej2_instances[0];
+            for(var i=8;i<29;i++)
             {
                 if(toolbarObj.items[i].type !=='Separator'){
                 toolbarObj.items[i].template = '<div></div>';
@@ -349,7 +446,7 @@ var UtilityMethods = (function () {
             }
         }
     };
-    UtilityMethods.prototype.download = function(data)
+    download (data)
     {
         if (window.navigator.msSaveBlob) {
             var blob = new Blob([data], { type: 'data:text/json;charset=utf-8,' });
@@ -365,9 +462,9 @@ var UtilityMethods = (function () {
             a.remove();
         }
     };
-    UtilityMethods.prototype.updateSelection = function(item)
+    updateSelection (item)
     {
-        for(i=0;i<item.parentObj.items.length;i++)
+        for(var i=0;i<item.parentObj.items.length;i++)
         {
             if(item.text === item.parentObj.items[i].text){
                 item.parentObj.items[i].iconCss = 'sf-icon-check-tick';
@@ -377,38 +474,40 @@ var UtilityMethods = (function () {
             }
         }
     };
-    UtilityMethods.prototype.onConnectorSelect = function(args)
-    {
-        diagram.clearSelection();
-        diagram.drawingObject.sourceID = '';
-        diagram.drawingObject.type = args.item.text;
-        diagram.tool = ej.diagrams.DiagramTools.ContinuousDraw;
-        diagram.selectedItems.userHandles = [];
-        diagram.dataBind();
+    onConnectorSelect(args) {
+        diagram.ej2_instances[0].clearSelection();
+        diagram.ej2_instances[0].drawingObject.sourceID = '';
+        diagram.ej2_instances[0].drawingObject.type = args.item.text;
+        diagram.ej2_instances[0].drawingObject.shape = { type: 'Bpmn', sequence: 'Normal' };
+        diagram.ej2_instances[0].tool = ej.diagrams.DiagramTools.ContinuousDraw;
+        diagram.ej2_instances[0].selectedItems.userHandles = [];
+        diagram.ej2_instances[0].dataBind();
         this.removeSelectedToolbarItem();
         document.getElementById('conTypeBtn').classList.add('tb-item-selected');
-    };
-    UtilityMethods.prototype.onOrderSelect = function(args)
+    }
+
+    onOrderSelect (args)
     {
         let text = args.item.text;
         switch(text)
         {
             case'Bring Forward':
-                diagram.moveForward();
+                diagram.ej2_instances[0].moveForward();
                 break;
             case'Bring To Front':
-                diagram.bringToFront();
+                diagram.ej2_instances[0].bringToFront();
                 break;
             case'Send Backward':
-                diagram.sendBackward();
+                diagram.ej2_instances[0].sendBackward();
                 break;
             case'Send To Back':
-                diagram.sendToBack();
+                diagram.ej2_instances[0].sendToBack();
                 break;
         }
     };
-    UtilityMethods.prototype.removeSelectedToolbarItem = function()
+    removeSelectedToolbarItem ()
     {
+        var toolbarObj = document.getElementById('toolbarObj').ej2_instances[0];
         for (var i = 0; i < toolbarObj.items.length; i++) {
             var item = toolbarObj.items[i];
             if (item.cssClass.indexOf('tb-item-selected') !== -1) {
@@ -416,11 +515,11 @@ var UtilityMethods = (function () {
             }
         }
         toolbarObj.dataBind();
-        //document.getElementById('conTypeBtn').classList.remove('tb-item-selected');
+        document.getElementById('conTypeBtn').classList.remove('tb-item-selected');
     };
-    UtilityMethods.prototype.getPaperSize = function(args)
+    getPaperSize (args)
     {
-        var paperSize = new PaperSize();
+        const paperSize = {};
         switch (args) {
             case 'Letter':
                 paperSize.pageWidth = 816;
@@ -465,14 +564,14 @@ var UtilityMethods = (function () {
         }
         return paperSize
     };
-    UtilityMethods.prototype.paperListChange = function(args)
+    paperListChange (args)
     {
         var value = args.item.value;
         var paperSize = this.getPaperSize(value);
         var pageWidth = paperSize.pageWidth;
         var pageHeight = paperSize.pageHeight;
         if (pageWidth && pageHeight) {
-            if (diagram.pageSettings.orientation === 'Portrait') {
+            if (diagram.ej2_instances[0].pageSettings.orientation === 'Portrait') {
                 if (pageWidth > pageHeight) {
                     var temp = pageWidth;
                     pageWidth = pageHeight;
@@ -486,47 +585,45 @@ var UtilityMethods = (function () {
                     pageWidth = temp;
                 }
             }
-            diagram.pageSettings.width = pageWidth;
-            diagram.pageSettings.height = pageHeight;
+            diagram.ej2_instances[0].pageSettings.width = pageWidth;
+            diagram.ej2_instances[0].pageSettings.height = pageHeight;
         }
         else{
-            diagram.pageSettings.width = 1460;
-            diagram.pageSettings.height = 600;
+            diagram.ej2_instances[0].pageSettings.width = 1460;
+            diagram.ej2_instances[0].pageSettings.height = 600;
         }
-        this.updatePaperSelection(designContextMenu.items[1],args.item.value);
-        diagram.dataBind();
+        this.updatePaperSelection(designContextMenu.ej2_instances[0].items[1],args.item.value);
+        diagram.ej2_instances[0].dataBind();
     };
-    UtilityMethods.prototype.pageOrientationChange = function(args)
+    pageOrientationChange (args)
     {
         if (args.target) {
             var target = args.target;
             var items = designContextMenu.items;
             switch (target.id) {
                 case 'pagePortrait':
-                    diagram.pageSettings.isPortrait = true;
-                    diagram.pageSettings.isLandscape = false;
-                    diagram.pageSettings.orientation = 'Portrait';
+                    diagram.ej2_instances[0].pageSettings.isPortrait = true;
+                    diagram.ej2_instances[0].pageSettings.isLandscape = false;
+                    diagram.ej2_instances[0].pageSettings.orientation = 'Portrait';
                     items[0].items[0].iconCss = '';
                     items[0].items[1].iconCss = 'sf-icon-check-tick';
                     break;
                 case 'pageLandscape':
-                    diagram.pageSettings.isPortrait = false;
-                    diagram.pageSettings.isLandscape = true;
-                    diagram.pageSettings.orientation = 'Landscape';
+                    diagram.ej2_instances[0].pageSettings.isPortrait = false;
+                    diagram.ej2_instances[0].pageSettings.isLandscape = true;
+                    diagram.ej2_instances[0].pageSettings.orientation = 'Landscape';
                     items[0].items[0].iconCss = 'sf-icon-check-tick';
                     items[0].items[1].iconCss = '';
                     break;
             }
-            diagram.dataBind();
-            // selectedItem.pageSettings.pageWidth = diagram.pageSettings.width;
-            // selectedItem.pageSettings.pageHeight = diagram.pageSettings.height;
+            diagram.ej2_instances[0].dataBind();
         }
     };
-    UtilityMethods.prototype.pageDimensionChange = function(args)
+    pageDimensionChange (args)
     {
         if (args.event) {
-            var pageWidth = Number(diagram.pageSettings.width);
-            var pageHeight = Number(diagram.pageSettings.height);
+            var pageWidth = Number(diagram.ej2_instances[0].pageSettings.width);
+            var pageHeight = Number(diagram.ej2_instances[0].pageSettings.height);
             var target = args.event.target;
             if (target.tagName.toLowerCase() === 'span') {
                 target = target.parentElement.children[0];
@@ -539,43 +636,42 @@ var UtilityMethods = (function () {
             }
             if (pageWidth && pageHeight) {
                 if (pageWidth > pageHeight) {
-                    diagram.pageSettings.isPortrait = false;
-                    diagram.pageSettings.isLandscape = true;
-                    diagram.pageSettings.orientation = 'Landscape';
+                    diagram.ej2_instances[0].pageSettings.isPortrait = false;
+                    diagram.ej2_instances[0].pageSettings.isLandscape = true;
+                    diagram.ej2_instances[0].pageSettings.orientation = 'Landscape';
                 }
                 else {
-                    diagram.pageSettings.isPortrait = true;
-                    diagram.pageSettings.isLandscape = false;
-                    diagram.pageSettings.orientation = 'Portrait';
+                    diagram.ej2_instances[0].pageSettings.isPortrait = true;
+                    diagram.ej2_instances[0].pageSettings.isLandscape = false;
+                    diagram.ej2_instances[0].pageSettings.orientation = 'Portrait';
                 }
-                 diagram.pageSettings.width = pageWidth;
-                 diagram.pageSettings.height = pageHeight;
-                diagram.dataBind();
+                 diagram.ej2_instances[0].pageSettings.width = pageWidth;
+                 diagram.ej2_instances[0].pageSettings.height = pageHeight;
+                diagram.ej2_instances[0].dataBind();
             }
         }
     };
-    UtilityMethods.prototype.pageBackgroundChange1= function(args)
+    pageBackgroundChange1 (args) 
     {
         if (args.currentValue) {
-            diagram.pageSettings.background = {
+            diagram.ej2_instances[0].pageSettings.background = {
                 color: args.currentValue.rgba
             };
-            // document.getElementById('background').style.display = 'none';
-            diagram.dataBind();
+            diagram.ej2_instances[0].dataBind();
         }
     };
-    UtilityMethods.prototype.pageBreaksChange = function(args)
+    pageBreaksChange (args)
     {
         if (args.event) {
-            diagram.pageSettings.showPageBreaks = args.checked;
-            diagram.dataBind();
+            diagram.ej2_instances[0].pageSettings.showPageBreaks = args.checked;
+            diagram.ej2_instances[0].dataBind();
             var items = btnViewMenu.items;
             items[4].iconCss = items[4].iconCss ? '' : 'sf-icon-check-tick';
         }
     };
-    UtilityMethods.prototype.updatePaperSelection = function(items,value)
+    updatePaperSelection (items,value)
     {
-        for(i=0;i<items.items.length;i++)
+        for( var i=0;i<items.items.length;i++)
         {
          if(value === items.items[i].value){
              items.items[i].iconCss = 'sf-icon-check-tick';
@@ -585,7 +681,7 @@ var UtilityMethods = (function () {
          }
         }
     };
-    UtilityMethods.prototype.updateTextAlign= function(textAlign)
+    updateTextAlign (textAlign)
     {
         var toolbarTextSubAlignment = document.getElementById('toolbarTextSubAlignment');
         if (toolbarTextSubAlignment) {
@@ -599,7 +695,7 @@ var UtilityMethods = (function () {
             toolbarTextSubAlignment.items[index].cssClass = toolbarTextSubAlignment.items[index].cssClass + ' tb-item-selected';
         }
     };
-    UtilityMethods.prototype.updateTextProperties = function(propertyName, propertyValue, annotation)
+    updateTextProperties (propertyName, propertyValue, annotation)
     {
         switch (propertyName) {
             case 'bold':
@@ -623,7 +719,7 @@ var UtilityMethods = (function () {
                 break;
         }
     };
-    UtilityMethods.prototype.updateTextFontProperties = function(propertyName, annotation)
+    updateTextFontProperties (propertyName, annotation)
     {
         switch (propertyName) {
             case 'fontfamily':
@@ -641,7 +737,7 @@ var UtilityMethods = (function () {
                 break;
         }
     };
-    UtilityMethods.prototype.updateHorVertAlign = function(horizontalAlignment, verticalAlignment)
+    updateHorVertAlign (horizontalAlignment, verticalAlignment)
     {
         var toolbarHorVerAlignment = document.getElementById('toolbarTextAlignment');
         if (toolbarHorVerAlignment) {
@@ -657,7 +753,7 @@ var UtilityMethods = (function () {
             toolbarHorVerAlignment.items[index].cssClass = toolbarHorVerAlignment.items[index].cssClass + ' tb-item-selected';
         }
     };
-    UtilityMethods.prototype.getPosition = function(offset)
+   getPosition (offset)
     {
         if (offset.x === 0 && offset.y === 0) {
             return 'TopLeft';
@@ -687,7 +783,7 @@ var UtilityMethods = (function () {
             return 'Center';
         }
     };
-    UtilityMethods.prototype.getHexColor = function(colorStr)
+   getHexColor (colorStr)
     {
         var a = document.createElement('div');
         a.style.color = colorStr;
@@ -697,14 +793,14 @@ var UtilityMethods = (function () {
         document.body.removeChild(a);
         return (colors.length >= 3) ? '#' + (((1 << 24) + (colors[0] << 16) + (colors[1] << 8) + colors[2]).toString(16).substr(1)) : '';
     };
-    UtilityMethods.prototype.getColor = function(colorName)
+    getColor (colorName)
     {
         if (window.navigator.msSaveBlob && colorName.length === 9) {
             return colorName.substring(0, 7);
         }
         return colorName;
     };
-    UtilityMethods.prototype.getOffset = function(position)
+    getOffset (position)
     {
         switch (position.toLowerCase()) {
             case 'topleft':
@@ -727,7 +823,7 @@ var UtilityMethods = (function () {
                 return { x: 1, y: 1 };
         }
     }
-    UtilityMethods.prototype.updateToolbarState = function(toolbarName, isSelected, index)
+    updateToolbarState (toolbarName, isSelected, index)
     {
         var toolbarTextStyle = document.getElementById(toolbarName);
         if (toolbarTextStyle) {
@@ -739,13 +835,12 @@ var UtilityMethods = (function () {
             toolbarTextStyle.dataBind();
         }
     };
-    UtilityMethods.prototype.applyNodeStyle = function(propertyName, node, value)
+    applyNodeStyle (propertyName, node, value)
     {
         var addInfo = node.addInfo || {};
         switch (propertyName) {
             case 'fillcolor':
                 node.style.fill = this.getColor(value);
-                // nodeFillColor.value = nodeProperties.fillColor;
                 if (value && value.checked) {
                     NodeProperties.prototype.getGradient(node);
                 }
@@ -777,13 +872,13 @@ var UtilityMethods = (function () {
                 break;
         }
     };
-    UtilityMethods.prototype.toolbarInsertClick = function(args)
+    toolbarInsertClick (args)
     {
-        if (diagram.selectedItems.nodes.length > 0) {
+        if (diagram.ej2_instances[0].selectedItems.nodes.length > 0) {
                     document.getElementById('hyperlink').value = '';
                     document.getElementById('hyperlinkText').value = '';
-                    if (diagram.selectedItems.nodes[0].annotations.length > 0) {
-                        var annotation = diagram.selectedItems.nodes[0].annotations[0];
+                    if (diagram.ej2_instances[0].selectedItems.nodes[0].annotations.length > 0) {
+                        var annotation = diagram.ej2_instances[0].selectedItems.nodes[0].annotations[0];
                         if (annotation.hyperlink.link || annotation.content) {
                             document.getElementById('hyperlink').value = annotation.hyperlink.link;
                             document.getElementById('hyperlinkText').value = annotation.hyperlink.content || annotation.content;
@@ -792,7 +887,7 @@ var UtilityMethods = (function () {
                     hyperlinkDialog.show();
         }
     };
-    UtilityMethods.prototype.aspectRatioClick = function(args)
+    aspectRatioClick (args)
     {
     var isAspect = true;
     if(document.getElementById('aspectRatioBtn').classList.contains('e-active'))
@@ -806,7 +901,7 @@ var UtilityMethods = (function () {
     }
         PropertyChange.prototype.nodePropertyChange({propertyName: 'aspectRatio', propertyValue: isAspect}); 
     };
-    UtilityMethods.prototype.getDialogButtons = function(dialogType)
+    getDialogButtons (dialogType)
     {
         var buttons= [];
         switch (dialogType) {
@@ -834,14 +929,14 @@ var UtilityMethods = (function () {
         });
         return buttons;
     };
-    UtilityMethods.prototype.btnHyperLink = function()
+    btnHyperLink ()
     {
-        var node = diagram.selectedItems.nodes[0];
+        var node = diagram.ej2_instances[0].selectedItems.nodes[0];
     if (node.annotations.length > 0) {
         node.annotations[0].hyperlink.link = document.getElementById('hyperlink').value;
         node.annotations[0].hyperlink.content = document.getElementById('hyperlinkText').value;
         this.applyToolTipforHyperlink(node);
-        diagram.dataBind();
+        diagram.ej2_instances[0].dataBind();
     } else {
         var annotation = {
             hyperlink: {
@@ -849,13 +944,13 @@ var UtilityMethods = (function () {
                 link: document.getElementById('hyperlink').value
             }
         };
-        diagram.addLabels(node, [annotation]);
+        diagram.ej2_instances[0].addLabels(node, [annotation]);
         this.applyToolTipforHyperlink(node);
-        diagram.dataBind();
+        diagram.ej2_instances[0].dataBind();
     }
     hyperlinkDialog.hide();
     };
-    UtilityMethods.prototype.applyToolTipforHyperlink = function(node)
+    applyToolTipforHyperlink (node)
     {
         node.constraints = ej.diagrams.NodeConstraints.Default & ~ej.diagrams.NodeConstraints.InheritTooltip | ej.diagrams.NodeConstraints.Tooltip;
         node.tooltip = {
@@ -863,7 +958,7 @@ var UtilityMethods = (function () {
             position: 'TopCenter', showTipPointer: true,
         };
     };
-    UtilityMethods.prototype.btnPrintClick = function()
+    btnPrintClick ()
     {
         var pageWidth = printSettings.pageWidth;
         var pageHeight = printSettings.pageHeight;
@@ -885,39 +980,36 @@ var UtilityMethods = (function () {
                 pageWidth = temp1;
             }
         }
-        diagram.print({
+        diagram.ej2_instances[0].print({
             region: printRegionDropdown.value, pageHeight: pageHeight, pageWidth: pageWidth,
             multiplePage: printMultiplePage.checked,
             pageOrientation:printPortrait.checked ? 'Portrait' : 'Landscape'
         });
-        printDialog.hide();
+
     };
-    UtilityMethods.prototype.btnExportClick = function()
+    btnExportClick ()
     {
-        diagram.exportDiagram({
+        diagram.ej2_instances[0].exportDiagram({
             fileName: document.getElementById("exportfileName").value,
             format: exportFormat.value,
             region: exportRegion.value
         });
-        exportDialog.hide();
+        exportDialog.ej2_instances[0].hide();
     };
-    UtilityMethods.prototype.btnCancelClick = function(args)
+    btnCancelClick (args)
     {
         var ss = args.target;
         var key = ss.offsetParent.id;
         switch (key) {
             case 'exportDialog':
-                exportDialog.hide();
-                break;
-            case 'printDialog':
-                printDialog.hide();
+                exportDialog.ej2_instances[0].hide();
                 break;
             case 'hyperlinkDialog':
-                hyperlinkDialog.hide();
+                hyperlinkDialoge.j2_instances[0].hide();
                 break;
         }
     };
-    UtilityMethods.prototype.hideMenuBar = function()
+    hideMenuBar ()
     {
         var expandcollapseicon = document.getElementById('btnHideMenubar');
         var button1 = expandcollapseicon.ej2_instances[0];
@@ -926,9 +1018,9 @@ var UtilityMethods = (function () {
         } else {
             button1.iconCss = 'sf-icon-chevron-up';
         }
-        UtilityMethods.prototype.hideElements('hide-menubar', diagram);
+        UtilityMethods.hideElements('hide-menubar', diagram.ej2_instances[0]);
     };
-    UtilityMethods.prototype.hideElements = function(elementType, diagram)
+    hideElements (elementType, diagram)
     {
         var diagramContainer = document.getElementsByClassName('diagrambuilder-container')[0];
         if (diagramContainer.classList.contains(elementType)) {
@@ -941,7 +1033,7 @@ var UtilityMethods = (function () {
             diagram.updateViewPort();
         }
     };
-    UtilityMethods.prototype.showColorPicker = function(propertyName, toolbarName)
+    showColorPicker (propertyName, toolbarName)
     {
             var fillElement =
                 document.getElementById(propertyName).parentElement.getElementsByClassName('e-dropdown-btn')[0];
@@ -951,5 +1043,6 @@ var UtilityMethods = (function () {
             popupElement.style.left = bounds.left + 'px';
             popupElement.style.top = (bounds.top + 40) + 'px';
     };
-    return UtilityMethods;
-}());
+   
+};
+module.exports = UtilityMethods;

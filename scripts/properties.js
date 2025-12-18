@@ -1,7 +1,10 @@
-var PropertyChange = (function () {
-    function PropertyChange() {
+var UtilityMethod = require("./utilitymethods.js");
+var  UtilityMethods = new UtilityMethod();
+
+class PropertyChange  {
+constructor() {
     };
-    PropertyChange.prototype.nodePropertyChange = function(args)
+   nodePropertyChange (args)
     {
            if (!diagram.preventPropertyChange) {
                if (diagram) {
@@ -32,11 +35,11 @@ var PropertyChange = (function () {
                                    break;
                            }
                            if (!node.children) {
-                                UtilityMethods.prototype.applyNodeStyle(propertyName1, node, args.propertyValue);
+                                UtilityMethods.applyNodeStyle(propertyName1, node, args.propertyValue);
                            }
                            else {
                                for (var j = 0; j < node.children.length; j++) {
-                                UtilityMethods.prototype.applyNodeStyle(propertyName1, diagram.getObject(node.children[j]), args.propertyValue);
+                                UtilityMethods.applyNodeStyle(propertyName1, diagram.getObject(node.children[j]), args.propertyValue);
                                }
                            }
                        }
@@ -47,7 +50,7 @@ var PropertyChange = (function () {
                        for (var i = 0; i < selectedNodes.length; i++) {
                            switch (args.propertyName.toString().toLowerCase()) {
                                case 'strokecolor':
-                                   connectorProperties.lineColor.value = UtilityMethods.prototype.getColor(nodeProperties.strokeColor.value);
+                                   connectorProperties.lineColor.value = UtilityMethods.getColor(nodeProperties.strokeColor.value);
                                    break;
                                case 'strokewidth':
                                    connectorProperties.lineWidth.value = nodeProperties.strokeWidth.value;
@@ -66,7 +69,7 @@ var PropertyChange = (function () {
                }
        }
     };
-    PropertyChange.prototype.connectorPropertyChange = function(args)
+connectorPropertyChange (args)
     {
             if (!diagram.preventPropertyChange) {
                 if (diagram && diagram.selectedItems.connectors.length > 0) {
@@ -75,7 +78,7 @@ var PropertyChange = (function () {
                         var connector = selectedNodes[i];
                         switch (args.propertyName.toString().toLowerCase()) {
                             case 'linecolor':
-                                connector.style.strokeColor = UtilityMethods.prototype.getColor(connectorProperties.lineColor.value);
+                                connector.style.strokeColor = UtilityMethods.getColor(connectorProperties.lineColor.value);
                                 connector.sourceDecorator.style = { fill: connector.style.strokeColor, strokeColor: connector.style.strokeColor };
                                 connector.targetDecorator.style = { fill: connector.style.strokeColor, strokeColor: connector.style.strokeColor };
                                 break;
@@ -136,7 +139,7 @@ var PropertyChange = (function () {
                 }
             }
     };
-    PropertyChange.prototype.textPropertyChange = function(args)
+   textPropertyChange (args)
     {
             if (!diagram.preventPropertyChange) {
                 if (diagram) {
@@ -150,7 +153,7 @@ var PropertyChange = (function () {
                                 if (node.annotations.length > 0) {
                                     for (var j = 0; j < node.annotations.length; j++) {
                                         var annotation = node.annotations[j].style;
-                                        UtilityMethods.prototype.updateTextFontProperties(propertyName, annotation);
+                                        UtilityMethods.updateTextFontProperties(propertyName, annotation);
                                     }
                                 }
                             }
@@ -161,7 +164,7 @@ var PropertyChange = (function () {
                 }
             }
     };
-    PropertyChange.prototype.textPropertiesChange = function(propertyName,propertyValue)
+    textPropertiesChange (propertyName,propertyValue)
     {
         if (!diagram.preventPropertyChange) {
             var selectedObjects = diagram.selectedItems.nodes;
@@ -178,7 +181,7 @@ var PropertyChange = (function () {
                                     annotation = node.annotations[j];
                                     if (propertyName === 'textposition') {
                                         textProperties.textPosition = propertyValue.toString();
-                                        annotation.offset = UtilityMethods.prototype.getOffset(propertyValue);
+                                        annotation.offset = UtilityMethods.getOffset(propertyValue);
                                     }
                                 }
                                 else if (node.annotations[j] instanceof ej.diagrams.PathAnnotation) {
@@ -190,23 +193,23 @@ var PropertyChange = (function () {
                                 }
                                 if (propertyName === 'left' || propertyName === 'right' || propertyName === 'center') {
                                     annotation.horizontalAlignment = propertyValue;
-                                    UtilityMethods.prototype.updateHorVertAlign(annotation.horizontalAlignment, annotation.verticalAlignment);
+                                    UtilityMethods.updateHorVertAlign(annotation.horizontalAlignment, annotation.verticalAlignment);
                                 }
                                 else if (propertyName === 'top' || propertyName === 'bottom') {
                                     annotation.verticalAlignment = propertyValue;
-                                    UtilityMethods.prototype.updateHorVertAlign(annotation.horizontalAlignment, annotation.verticalAlignment);
+                                    UtilityMethods.updateHorVertAlign(annotation.horizontalAlignment, annotation.verticalAlignment);
                                 }
                                 else if (propertyName === 'middle') {
                                     annotation.verticalAlignment = 'Center';
-                                    UtilityMethods.prototype.updateHorVertAlign(annotation.horizontalAlignment, annotation.verticalAlignment);
+                                    UtilityMethods.updateHorVertAlign(annotation.horizontalAlignment, annotation.verticalAlignment);
                                 }
                                 else {
-                                    UtilityMethods.prototype.updateTextProperties(propertyName, propertyValue, annotation.style);
+                                    UtilityMethods.updateTextProperties(propertyName, propertyValue, annotation.style);
                                 }
                             }
                         }
                         else if (node.shape && node.shape.type === 'Text') {
-                            UtilityMethods.prototype.updateTextProperties(propertyName, propertyValue, node.style);
+                            UtilityMethods.updateTextProperties(propertyName, propertyValue, node.style);
                         }
                     }
                 }
@@ -214,5 +217,6 @@ var PropertyChange = (function () {
             }
         }
     }
-    return PropertyChange;
-}());
+   
+}
+module.exports = PropertyChange;

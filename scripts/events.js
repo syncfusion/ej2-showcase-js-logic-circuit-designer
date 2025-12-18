@@ -1,46 +1,90 @@
-var DiagramClientSideEvents = (function () {
-    function DiagramClientSideEvents(){
+class DiagramClientSideEvents   {
+    constructor (){
     };
-    DiagramClientSideEvents.prototype.selectionChange = function (args)
-    {
-        {
-            if(args.state === 'Changed'){
-                var selectedItems = diagram.selectedItems.nodes;
-                selectedItems = selectedItems.concat(diagram.selectedItems.connectors);
-                enableToolbarItems(selectedItems);
-                if(args.newValue.length>0 && args.newValue[0] instanceof ej.diagrams.Connector){
-                    diagram.selectedItems = { constraints: ej.diagrams.SelectorConstraints.All };
-                    toolbarObj.hideItem(6,true);
-                    // toolbarObj.items[7].template = '<div style="margin-left:1000px;"></div>';
+     enableToolbarItems(selectedItems) {
+        var toolbarContainer = document.getElementsByClassName('db-toolbar-container')[0];
+        var toolbarClassName = 'db-toolbar-container';
+        if (toolbarContainer.classList.contains('db-undo')) {
+            toolbarClassName += ' db-undo';
+        }
+        if (toolbarContainer.classList.contains('db-redo')) {
+            toolbarClassName += ' db-redo';
+        }
+        toolbarContainer.className = toolbarClassName;
+        if (selectedItems.length === 1) {
+            toolbarContainer.className = toolbarContainer.className + ' db-select';
+            if (selectedItems[0] instanceof ej.diagrams.Node) {
+                if (selectedItems[0].children) {
+                    if (selectedItems[0].children.length > 2) {
+                        toolbarContainer.className = toolbarContainer.className + ' db-select db-double db-multiple db-node db-group';
+                    }
+                    else {
+                        toolbarContainer.className = toolbarContainer.className + ' db-select db-double db-node db-group';
+                    }
                 }
-                else{
-                    if(diagram.selectedItems.nodes.length > 0 &&
-                         diagram.selectedItems.nodes[0].id.indexOf('Clock') != -1)
-                    {
-                        toolbarObj.hideItem(6,false);
-                        // toolbarObj.items[7].template = '<div style="margin-left:900px;"></div>';
-                    }
-                    else
-                    {
-                        toolbarObj.hideItem(6,true);
-                        // toolbarObj.items[7].template = '<div style="margin-left:1000px;"></div>';
-                    }
-                diagram.selectedItems = { constraints: ej.diagrams.SelectorConstraints.All & ~ej.diagrams.SelectorConstraints.Rotate & ~ej.diagrams.SelectorConstraints.ResizeAll };
+                else {
+                    toolbarContainer.className = toolbarContainer.className + ' db-select db-node';
+                }
+            }
+        }
+        else if (selectedItems.length === 2) {
+            toolbarContainer.className = toolbarContainer.className + ' db-select db-double';
+        }
+        else if (selectedItems.length > 2) {
+            toolbarContainer.className = toolbarContainer.className + ' db-select db-double db-multiple';
+        }
+        if (selectedItems.length > 1) {
+            var isNodeExist = false;
+            for (var i = 0; i < selectedItems.length; i++) {
+                if (selectedItems[i] instanceof ej.diagrams.Node) {
+                    toolbarContainer.className = toolbarContainer.className + ' db-select db-node';
+                    break;
                 }
             }
         }
     };
-    DiagramClientSideEvents.prototype.historyChange = function(args)
+    
+   selectionChange  (args)
+    {
+        var diagrams = diagram.ej2_instances[0];
+        var toolbarObj = document.getElementById('toolbarObj').ej2_instances[0];
+        {
+            if(args.state === 'Changed'){
+                var selectedItems = diagrams.selectedItems.nodes;
+                selectedItems = selectedItems.concat(diagrams.selectedItems.connectors);
+                this.enableToolbarItems(selectedItems);
+                if(args.newValue.length>0 && args.newValue[0] instanceof ej.diagrams.Connector){
+                    diagrams.selectedItems = { constraints: ej.diagrams.SelectorConstraints.All };
+                    toolbarObj.hideItem(5,true);
+                }
+                else{
+                    if(diagrams.selectedItems.nodes.length > 0 &&
+                        diagrams.selectedItems.nodes[0].id.indexOf('Clock') != -1)
+                    {
+                        toolbarObj.hideItem(5,false);
+                    }
+                    else
+                    {
+                        toolbarObj.hideItem(5,true);
+                    }
+                    diagrams.selectedItems = { constraints: ej.diagrams.SelectorConstraints.All & ~ej.diagrams.SelectorConstraints.Rotate & ~ej.diagrams.SelectorConstraints.ResizeAll };
+                }
+            }
+        }
+    };
+    historyChange (args)
     {
         var toolbarContainer = document.getElementsByClassName('db-toolbar-container')[0];
+        var diagrams = diagram.ej2_instances[0];
         toolbarContainer.classList.remove('db-undo');
         toolbarContainer.classList.remove('db-redo');
-        if (diagram.historyManager.undoStack.length > 0) {
+        if (diagrams.historyManager.undoStack.length > 0) {
             toolbarContainer.classList.add('db-undo');
         }
-        if (diagram.historyManager.redoStack.length > 0) {
+        if (diagrams.historyManager.redoStack.length > 0) {
             toolbarContainer.classList.add('db-redo');
         }
     };
-     return DiagramClientSideEvents;
-}());
+    
+};
+module.exports = DiagramClientSideEvents;

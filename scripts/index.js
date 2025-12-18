@@ -1,14 +1,18 @@
-ej.diagrams.Diagram.Inject( ej.diagrams.UndoRedo);
 var conTypeBtn;
 var orderBtn;
 var Odd1 ; var Odd2;
 var hidePropertyBtn;
 var drawingNode;
-var diagramEvents = new DiagramClientSideEvents();
-var dropDownDataSources = new DropDownDataSources();
-var propertyChange = new PropertyChange();
-var utilityMethods = new UtilityMethods();
+const DiagramClientSideEvents = require('./events.js');
+const dropDownDataSource = require('./dropdowndatasource.js');
+const PropertyChange = require('./properties.js');
+const UtilityMethod = require('./utilitymethods.js');
+const { select } = require('@syncfusion/ej2-base');
 
+var diagramEvents = new DiagramClientSideEvents();
+var dropDownDataSources = new dropDownDataSource();
+var propertyChanges = new PropertyChange();
+var utilityMethods = new UtilityMethod();
 window.onload = function () {
     document.onmouseover = menumouseover.bind(this);
     zoomCurrentValue = document.getElementById("btnZoomIncrement").ej2_instances[0];
@@ -978,21 +982,21 @@ var diagram = new ej.diagrams.Diagram({
     width: '100%', height: '100%',
     nodes: nodes, connectors: connectors, drawingObject: { type: 'Bezier',bezierSettings:{ controlPointsVisibility: ej.diagrams.ControlPointsVisibility.Source | ej.diagrams.ControlPointsVisibility.Target
         ,smoothness: ej.diagrams.BezierSmoothness.SymmetricDistance } },
-    created: created, click: click, drop: drop, getConnectorDefaults: getConnectorDefaults, //mouseLeave: mouseLeave,
+    created: created, click: click, drop: drop, getConnectorDefaults: getConnectorDefaults,
     elementDraw: elementDraw, selectedItems: { constraints: ej.diagrams.SelectorConstraints.All & ~ej.diagrams.SelectorConstraints.ResizeAll & ~ej.diagrams.SelectorConstraints.Rotate },
     pageSettings: { showPageBreaks: false },
     collectionChange: collectionChange,
     scrollChange:scrollChange,
     pageSettings: {
-        background: { color: '#FFFFFF' }, width: 600, height: 1460, margin: { left: 5, top: 5 },
+        background: { color: '#FFFFFF' }, width: 800, height: 1460, margin: { left: 5, top: 5 },
         orientation: 'Landscape', showPageBreaks: false,
     }, scrollSettings: { canAutoScroll: true, scrollLimit: 'Infinity', minZoom: 0.25, maxZoom: 30 },
     rulerSettings: {
         showRulers: true, dynamicGrid: true, horizontalRuler: { interval: 10, segmentWidth: 100, thickness: 25, },
         verticalRuler: { interval: 10, segmentWidth: 100, thickness: 25, },
     },
-    selectionChange: function (args) { DiagramClientSideEvents.prototype.selectionChange(args) },
-    historyChange: function (args) { DiagramClientSideEvents.prototype.historyChange(args) },
+    selectionChange: function (args) { diagramEvents.selectionChange(args) },
+    historyChange: function (args) { diagramEvents.historyChange(args) },
 });
 
 function collectionChange(args) {
@@ -1003,7 +1007,7 @@ function collectionChange(args) {
     if(args.panState !=='Start'){
     btnZoomIncrement.content = Math.round(diagram.scrollSettings.currentZoom * 100) + ' %';
     }
- }
+}
 document.getElementById('diagram').onmouseup = function (args) {
     if (args.target.id.indexOf('Push') != -1) {
         var targetid = args.target.id.replace("group_container", "");
@@ -1063,8 +1067,9 @@ function elementDraw(args) {
                 }
             });
             if (targetport.inEdges.length > 1) {
-            // diagram.commandHandler.addObjectToDiagram(diagram.selectedItems.connectors[0]);
+            setTimeout(() => {
                 diagram.remove();
+            }, 100);
             }
         }
 
@@ -1085,14 +1090,14 @@ function elementDraw(args) {
             RunSimulation();
         }
         else {
-            // diagram.commandHandler.addObjectToDiagram(diagram.selectedItems.connectors[0]);
-            diagram.remove();
+            setTimeout(() => {
+                diagram.remove();
+            }, 100);
         }
     }
 }
 
 function getConnectorDefaults(connector) {
-    connector.type = 'Bezier';
     connector.hitPadding = 20;
     connector.bezierSettings = { controlPointsVisibility: ej.diagrams.ControlPointsVisibility.Source | ej.diagrams.ControlPointsVisibility.Target
     ,smoothness: ej.diagrams.BezierSmoothness.SymmetricDistance }
@@ -1135,9 +1140,6 @@ function drop(args) {
                 }else if(ele.id.indexOf('CLKInnerPart')!== -1){
                 ele.width+=10; ele.height+=10;
                 }
-                // else{
-                // ele.width+=10; ele.height+=10;
-                // }
             }
         }
         args.element.ports.forEach(element => {
@@ -1171,8 +1173,6 @@ function drop(args) {
     else if (args.element.id.indexOf("Push") != -1) {
         args.element.addInfo = { binarystate: 0, controltype: 'inputcontrol' };
         args.element.ports = pushbuttonport;
-        // args.element.width = 80;
-        // args.element.height = 60;
         if(args.element.children){
             for(i=0;i<args.element.children.length;i++)
             {
@@ -1299,7 +1299,6 @@ function drop(args) {
                         ele.height+=4;ele.offsetY-=2.2;ele.offsetX+=0.4;
                        }
                 else{
-                // ele.width+=9; ele.height+=9
                 }
             }
         }
@@ -1367,8 +1366,6 @@ function click(args) {
                 OnInputChanged(element);
             }
         });
-        // out1 = 1-out1;
-        // out2 = 1-out2;
     }
 };
 
@@ -1395,7 +1392,7 @@ function created(args) {
 function OutputControl(element) {
     if (element.id.indexOf("Bulb") != -1) {
         var InputCon1 = diagram.getObject(element.inEdges[0]);
-        if (InputCon1 != undefined && InputCon1.addInfo != undefined) {
+        if (InputCon1 != undefined && InputCon1.addInfo != undefined && InputCon1.addInfo.binarystate != undefined) {
             var Inputstate1 = InputCon1.addInfo.binarystate;
             if (Inputstate1 == 0) {
                 var child1 = diagram.getObject(element.children[2]);
@@ -1442,16 +1439,24 @@ function OutputControl(element) {
         InputConnectors.forEach(con => {
             if (con != undefined) {
                 if (con.targetPortID == "digitport1") {
+                    if(con.addInfo && con.addInfo.binarystate){
                     Inputstate1 = con.addInfo.binarystate;
+                    }
                 }
                 else if (con.targetPortID == "digitport2") {
-                    Inputstate2 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate2 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "digitport3") {
-                    Inputstate3 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate3 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "digitport4") {
-                    Inputstate4 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate4 = con.addInfo.binarystate;
+                        }
                 }
             }
 
@@ -1527,19 +1532,29 @@ function FlipFlopOutput(element) {
         InputConnectors.forEach(con => {
             if (con != undefined) {
                 if (con.targetPortID == "jport") {
-                    Inputstate1 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate1 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "clkport") {
-                    Inputstate2 = con.addInfo?con.addInfo.binarystate:0;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate2 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "kport") {
-                    Inputstate3 = con.addInfo?con.addInfo.binarystate:0;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate3 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "preport") {
-                    Inputstate4 = con.addInfo?con.addInfo.binarystate:0;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate4 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "clrport") {
-                    Inputstate5 = con.addInfo?con.addInfo.binarystate:0;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate5 = con.addInfo.binarystate;
+                        }
                 }
             }
         });
@@ -1581,54 +1596,6 @@ function FlipFlopOutput(element) {
         {
             skip = true;
         }
-
-        // if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 0)) {
-        //     outstate1 = 0;
-        //     outstate2 = 1;
-        // }
-
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1 && Inputstate5 == 1)) {
-        //     outstate1 = 1;
-        //     outstate2 = 0;
-        // }
-
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0 && Inputstate5 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0 && Inputstate5 == 0)) {
-        //     outstate1 = 1;
-        //     outstate2 = 1;
-        // }
-
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1 && Inputstate5 == 1)) {
-        //     outstate1 = 0;
-        //     outstate2 = 0;
-        // }
         if(!skip){
 
         element.addInfo.binarystate1 = outstate1;
@@ -1701,16 +1668,24 @@ function FlipFlopOutput(element) {
         InputConnectors.forEach(con => {
             if (con != undefined) {
                 if (con.targetPortID == "DTport") {
-                    Inputstate1 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate1 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "clkport") {
-                    Inputstate2 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate2 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "preport") {
-                    Inputstate3 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate3 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "clrport") {
-                    Inputstate4 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate4 = con.addInfo.binarystate;
+                        }
                 }
             }
         });
@@ -1745,33 +1720,6 @@ function FlipFlopOutput(element) {
             outstate1 = 1;
             outstate2 = 0;
         }
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0)) {
-        //     outstate1 = 0;
-        //     outstate2 = 1;
-        // }
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1)) {
-        //     outstate1 = 1;
-        //     outstate2 = 0;
-        // }
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0)) {
-        //     outstate1 = 1;
-        //     outstate2 = 1;
-        // }
-        // else if (Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0) {
-        //     outstate1 = 0;
-        //     outstate2 = 0;
-        // }
 
         element.addInfo.binarystate1 = outstate1;
         element.addInfo.binarystate2 = outstate2;
@@ -1844,16 +1792,24 @@ function FlipFlopOutput(element) {
         InputConnectors.forEach(con => {
             if (con != undefined) {
                 if (con.targetPortID == "DTport") {
-                    Inputstate1 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate1 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "clkport") {
-                    Inputstate2 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate2 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "preport") {
-                    Inputstate3 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate3 = con.addInfo.binarystate;
+                        }
                 }
                 else if (con.targetPortID == "clrport") {
-                    Inputstate4 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate4 = con.addInfo.binarystate;
+                        }
                 }
             }
         });
@@ -1880,15 +1836,17 @@ function FlipFlopOutput(element) {
                 outConnects.forEach(con => {
                     if (con != undefined) {
                         if (con.sourcePortID == "qport") {
-                            outState1 = con.addInfo.binarystate;
+                            if(con.addInfo && con.addInfo.binarystate){
+                                outstate1 = con.addInfo.binarystate;
+                                }
                         }
                         else if (con.sourcePortID == "q1port") {
-                            outState2 = con.addInfo.binarystate;
+                            if(con.addInfo && con.addInfo.binarystate){
+                                outstate2 = con.addInfo.binarystate;
+                                }
                         }
                     }
                 });
-                // outstate1 = outState1===1?0:1;
-                // outstate2 = outState2===1?0:1;
                 outstate1 = out1;
                 outstate2 = out2;
             }
@@ -1915,35 +1873,6 @@ function FlipFlopOutput(element) {
         else if((Inputstate3 == 1 && Inputstate4 == 1)){
             skip = true;
         }
-
-        // if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 0)) {
-        //     outstate1 = 0;
-        //     outstate2 = 1;
-        // }
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 1)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 1 && Inputstate4 == 1)) {
-        //     outstate1 = 1;
-        //     outstate2 = 0;
-        // }
-        // else if ((Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0)
-        //     || (Inputstate1 == 0 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 0 && Inputstate3 == 0 && Inputstate4 == 0)
-        //     || (Inputstate1 == 1 && Inputstate2 == 1 && Inputstate3 == 0 && Inputstate4 == 0)) {
-        //     outstate1 = 1;
-        //     outstate2 = 1;
-        // }
-        // else if (Inputstate1 == 0 && Inputstate2 == 0 && Inputstate3 == 1 && Inputstate4 == 1) {
-        //     outstate1 = 0;
-        //     outstate2 = 0;
-        // }
         if(!skip){
         element.addInfo.binarystate1 = outstate1;
         element.addInfo.binarystate2 = outstate2;
@@ -2016,13 +1945,19 @@ function FlipFlopOutput(element) {
         InputConnectors.forEach(con => {
             if (con != undefined) {
                 if (con.targetPortID == "sport") {
-                    Inputstate1 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate1 = con.addInfo.binarystate;
+                    }
                 }
                 else if (con.targetPortID == "clkport") {
-                    Inputstate2 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate2 = con.addInfo.binarystate;
+                    }
                 }
                 else if (con.targetPortID == "rport") {
-                    Inputstate3 = con.addInfo.binarystate;
+                    if(con.addInfo && con.addInfo.binarystate){
+                        Inputstate3 = con.addInfo.binarystate;
+                    }
                 }
             }
         });
@@ -2107,10 +2042,10 @@ function OtherControl(element) {
         var Inputstate1 = 0;
         var Inputstate2 = 0;
         if (InputCon1 != undefined && InputCon2 != undefined) {
-            if (InputCon1.addInfo != undefined) {
+            if (InputCon1.addInfo != undefined && InputCon1.addInfo.binarystate) {
                 Inputstate1 = InputCon1.addInfo.binarystate;
             }
-            if (InputCon2.addInfo != undefined) {
+            if (InputCon2.addInfo != undefined && InputCon2.addInfo.binarystate) {
                 var Inputstate2 = InputCon2.addInfo.binarystate;
             }
             var state = undefined;
@@ -2158,7 +2093,9 @@ function OtherControl(element) {
         }
 
         else if (InputCon2 == undefined && InputCon1 != undefined) {
+            if(InputCon1.addInfo && InputCon1.addInfo.binarystate){
             var Inputstate1 = InputCon1.addInfo.binarystate;
+            }
             var state = Inputstate1;
             element.addInfo.binarystate = state;
 
@@ -2250,10 +2187,10 @@ function GatesOutput(element) {
         var Inputstate1 = 0;
         var Inputstate2 = 0;
         if (InputCon1 != undefined && InputCon2 != undefined) {
-            if (InputCon1.addInfo != undefined) {
+            if (InputCon1.addInfo != undefined && InputCon1.addInfo.binarystate) {
                 Inputstate1 = InputCon1.addInfo.binarystate;
             }
-            if (InputCon2.addInfo != undefined) {
+            if (InputCon2.addInfo != undefined && InputCon2.addInfo.binarystate) {
                 var Inputstate2 = InputCon2.addInfo.binarystate;
             }
             var state = undefined;
@@ -2293,10 +2230,10 @@ function GatesOutput(element) {
         var Inputstate1 = 0;
         var Inputstate2 = 0;
         if (InputCon1 != undefined && InputCon2 != undefined) {
-            if (InputCon1.addInfo != undefined) {
+            if (InputCon1.addInfo != undefined && InputCon1.addInfo.binarystate) {
                 Inputstate1 = InputCon1.addInfo.binarystate;
             }
-            if (InputCon2.addInfo != undefined) {
+            if (InputCon2.addInfo != undefined && InputCon2.addInfo.binarystate) {
                 var Inputstate2 = InputCon2.addInfo.binarystate;
             }
             var state = undefined;
@@ -2336,10 +2273,10 @@ function GatesOutput(element) {
         var Inputstate1 = 0;
         var Inputstate2 = 0;
         if (InputCon1 != undefined && InputCon2 != undefined) {
-            if (InputCon1.addInfo != undefined) {
+            if (InputCon1.addInfo != undefined && InputCon1.addInfo.binarystate) {
                 Inputstate1 = InputCon1.addInfo.binarystate;
             }
-            if (InputCon2.addInfo != undefined) {
+            if (InputCon2.addInfo != undefined && InputCon2.addInfo.binarystate) {
                 var Inputstate2 = InputCon2.addInfo.binarystate;
             }
             var state = undefined;
@@ -2505,7 +2442,9 @@ function GatesOutput(element) {
     else if (element.id.indexOf("Not") != -1) {
         var InputCon1 = diagram.getObject(element.inEdges[0]);
         if (InputCon1 != undefined) {
-            var Inputstate1 = InputCon1.addInfo.binarystate;
+            if(InputCon1.addInfo && InputCon1.addInfo.binarystate){
+                var Inputstate1 = InputCon1.addInfo.binarystate;
+                }
             var state = undefined;
             if (Inputstate1 == 0) {
                 element.addInfo.binarystate = 1;
@@ -2535,7 +2474,9 @@ function GatesOutput(element) {
     else if (element.id.indexOf("Buffer") != -1) {
         var InputCon1 = diagram.getObject(element.inEdges[0]);
         if (InputCon1 != undefined) {
-            var Inputstate1 = InputCon1.addInfo.binarystate;
+            if(InputCon1.addInfo && InputCon1.addInfo.binarystate){
+                var Inputstate1 = InputCon1.addInfo.binarystate;
+                }
             var state = undefined;
             if (Inputstate1 == 1) {
                 element.addInfo.binarystate = 1;
@@ -2613,11 +2554,6 @@ function OnInputChanged(args) {
             Child1.style.fill = "#05DAC5";
         }
     }
-    // else if (args.id.indexOf("Push") != -1) {
-    //     var child1 = diagram.getObject(args.children[1]);
-    //     child1.style.fill = "#05DAC5";
-    //     args.addInfo.binarystate = 1;
-    // }
 
     RunSimulation();
 }
@@ -2625,18 +2561,6 @@ function OnInputChanged(args) {
 
 function RunSimulation() {
 
-    // var needToDeleteConnector = [];
-
-    // diagram.connectors.forEach(element => {
-    //     if(element.sourcePortID == "" || element.sourcePortID == undefined 
-    //     ||element.targetPortID == "" || element.targetPortID == undefined){
-    //         needToDeleteConnector.push(element);
-    //     }
-    // });
-
-    // needToDeleteConnector.forEach(element => {
-    //     diagram.remove();
-    // });
     var isFlip= true;
     var regulatednodes = [];
     for (let i = 0; i < diagram.nodes.length; i++) {
@@ -2852,7 +2776,7 @@ var PageSettings = (function () {
 var pageSettings = new PageSettings();
 
 
-function renameDiagram(args) {
+window.renameDiagram = function(args) {
     document.getElementsByClassName('db-diagram-name-container')[0].classList.add('db-edit-name');
     var element = document.getElementById('diagramEditable');
     element.value = document.getElementById('diagramName').innerHTML;
@@ -2860,14 +2784,14 @@ function renameDiagram(args) {
     element.select();
 }
 
-function diagramNameKeyDown(args) {
+window.diagramNameKeyDown = function(args) {
     if (args.which === 13) {
         document.getElementById('diagramName').innerHTML = document.getElementById('diagramEditable').value;
         document.getElementsByClassName('db-diagram-name-container')[0].classList.remove('db-edit-name');
     }
 }
 
-function diagramNameChange(args) {
+window.diagramNameChange = function(args) {
     document.getElementById('diagramName').innerHTML = document.getElementById('diagramEditable').value;
     document.getElementsByClassName('db-diagram-name-container')[0].classList.remove('db-edit-name');
     document.getElementById("exportfileName").value = document.getElementById('diagramName').innerHTML;
@@ -2875,9 +2799,9 @@ function diagramNameChange(args) {
 
 var btnFileMenu = new ej.splitbuttons.DropDownButton({
     cssClass: 'db-dropdown-menu',
-    items: DropDownDataSources.prototype.getFileMenuItems(),
+    items: dropDownDataSources.getFileMenuItems(),
     content: 'File',
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeItemRender: beforeItemRender,
     beforeOpen: arrangeMenuBeforeOpen,
     beforeClose: arrangeMenuBeforeClose
@@ -2887,9 +2811,9 @@ btnFileMenu.appendTo('#btnFileMenu');
 
 var btnSelectMenu = new ej.splitbuttons.DropDownButton({
     cssClass: 'db-dropdown-menu',
-    items: DropDownDataSources.prototype.getSelectMenuItems(),
+    items: dropDownDataSources.getSelectMenuItems(),
     content: 'Select',
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeItemRender: beforeItemRender,
     beforeOpen: arrangeMenuBeforeOpen,
     beforeClose: arrangeMenuBeforeClose
@@ -2897,12 +2821,11 @@ var btnSelectMenu = new ej.splitbuttons.DropDownButton({
 btnSelectMenu.appendTo('#btnSelectMenu');
 
 
-
 var btnViewMenu = new ej.splitbuttons.DropDownButton({
     cssClass: 'db-dropdown-menu',
-    items: DropDownDataSources.prototype.getViewMenuItems(),
+    items: dropDownDataSources.getViewMenuItems(),
     content: 'View',
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeItemRender: beforeItemRender,
     beforeOpen: arrangeMenuBeforeOpen,
     beforeClose: arrangeMenuBeforeClose
@@ -2936,7 +2859,6 @@ function arrangeMenuBeforeOpen(args) {
     for (var i = 0; i < args.element.children.length; i++) {
         args.element.children[i].style.display = 'block';
     }
-    //(args.element.children[0]).style.display = 'block';
     if (args.event && ej.base.closest(args.event.target, '.e-dropdown-btn') !== null) {
         args.cancel = true;
     }
@@ -2982,12 +2904,6 @@ function getShortCutKey(menuItem) {
             break;
         case 'Save':
             shortCutKey = shortCutKey + '+S';
-            break;
-        case 'Undo':
-            shortCutKey = shortCutKey + '+Z';
-            break;
-        case 'Redo':
-            shortCutKey = shortCutKey + '+Y';
             break;
         case 'Cut':
             shortCutKey = shortCutKey + '+X';
@@ -3124,17 +3040,25 @@ var disabledItems = ['Cut', 'Copy', 'Send To Back', 'Bring To Front', 'Delete'];
 var undoRedoItems = ['Undo', 'Redo'];
 var rotateItems = ['Rotate Clockwise', 'Rotate Counter Clockwise'];
 var pasteItem = ['Paste'];
-
+var isConToolActive = false;
 //Initialize Toolbar component
 var toolbarObj = new ej.navigations.Toolbar({
-    clicked: function (args) { UtilityMethods.prototype.toolbarClick(args) },
+    clicked: function (args) { utilityMethods.toolbarClick(args) },
     created: function (args) {
         if(diagram !== undefined){
+            var conTypeBtn = new ej.splitbuttons.DropDownButton({
+                items: conTypeItems, iconCss:'sf-icon-orthogonal_line',
+                cssClass:(diagram.tool === 16 && diagram.drawingObject.shape.type === 'Bpmn')? 'tb-item-middle tb-item-selected' : 'tb-item-middle',
+                select: function (args) {utilityMethods.onConnectorSelect(args)}
+            });
+            conTypeBtn.appendTo('#conTypeBtn');
+
             var btnZoomIncrement = new ej.splitbuttons.DropDownButton({ items: zoomMenuItems, content: Math.round(diagram.scrollSettings.currentZoom * 100) + ' %', select: zoomChange });
             btnZoomIncrement.appendTo('#btnZoomIncrement');
+            
         }
     },
-    items: DropDownDataSources.prototype.toolbarItems(),
+    items: dropDownDataSources.toolbarItems(),
     width: '100%',
     overflowMode: 'Popup'
 });
@@ -3154,11 +3078,8 @@ var orderItems = [
 var zoomMenuItems = [
     { text: 'Zoom In' },{ text: 'Zoom Out' },{ text: 'Zoom to Fit' },{ text: 'Zoom to 50%' },
     { text: 'Zoom to 100%' },{ text: 'Zoom to 200%' },
-                    ];
-conTypeBtn = new ej.splitbuttons.DropDownButton({
-    items: conTypeItems, iconCss: 'sf-icon-orthogonal_line',
-    select: function (args) { UtilityMethods.prototype.onConnectorSelect(args) }
-});
+];
+
 function enable() {
     toolbarObj.items[18].disabled = false;
     toolbarObj.items[18].template = '';
@@ -3169,49 +3090,6 @@ function disable() {
     toolbarObj.items[18].template = '<div></div>';
     toolbarObj.dataBind();
 }
-
-function enableToolbarItems(selectedItems) {
-    var toolbarContainer = document.getElementsByClassName('db-toolbar-container')[0];
-    var toolbarClassName = 'db-toolbar-container';
-    if (toolbarContainer.classList.contains('db-undo')) {
-        toolbarClassName += ' db-undo';
-    }
-    if (toolbarContainer.classList.contains('db-redo')) {
-        toolbarClassName += ' db-redo';
-    }
-    toolbarContainer.className = toolbarClassName;
-    if (selectedItems.length === 1) {
-        toolbarContainer.className = toolbarContainer.className + ' db-select';
-        if (selectedItems[0] instanceof ej.diagrams.Node) {
-            if (selectedItems[0].children) {
-                if (selectedItems[0].children.length > 2) {
-                    toolbarContainer.className = toolbarContainer.className + ' db-select db-double db-multiple db-node db-group';
-                }
-                else {
-                    toolbarContainer.className = toolbarContainer.className + ' db-select db-double db-node db-group';
-                }
-            }
-            else {
-                toolbarContainer.className = toolbarContainer.className + ' db-select db-node';
-            }
-        }
-    }
-    else if (selectedItems.length === 2) {
-        toolbarContainer.className = toolbarContainer.className + ' db-select db-double';
-    }
-    else if (selectedItems.length > 2) {
-        toolbarContainer.className = toolbarContainer.className + ' db-select db-double db-multiple';
-    }
-    if (selectedItems.length > 1) {
-        var isNodeExist = false;
-        for (var i = 0; i < selectedItems.length; i++) {
-            if (selectedItems[i] instanceof ej.diagrams.Node) {
-                toolbarContainer.className = toolbarContainer.className + ' db-select db-node';
-                break;
-            }
-        }
-    }
-};
 
 var uploadObj = new ej.inputs.Uploader({
     asyncSettings: {
@@ -3224,8 +3102,7 @@ var uploadObj = new ej.inputs.Uploader({
 uploadObj.appendTo('#fileupload');
 
 
-toolbarObj.appendTo('#toolbarEditor');
-conTypeBtn.appendTo('#conTypeBtn');
+toolbarObj.appendTo('#toolbarObj');
 
 var numeric = new ej.inputs.NumericTextBox({
     // sets the minimum range value
@@ -3256,10 +3133,13 @@ function onUploadSuccess(args) {
     var reader = new FileReader();
     reader.readAsText(file);
     reader.onloadend = loadDiagram;
+    uploadObj.clearAll();
+
 }
 //Load the diagraming object.
 function loadDiagram(event) {
     diagram.loadDiagram(event.target.result);
+    diagram.fitToPage();
 }
 
 
@@ -3307,33 +3187,33 @@ var PaperSize = (function () {
 }());
 var editContextMenu = new ej.navigations.ContextMenu({
     animationSettings: { effect: 'None' },
-    items: DropDownDataSources.prototype.getEditMenuItems(),
+    items: dropDownDataSources.getEditMenuItems(),
     onOpen: editContextMenuOpen,
     cssClass: "EditMenu",
     beforeItemRender: beforeItemRender,
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeClose: arrangeMenuBeforeClose
 })
 editContextMenu.appendTo('#editContextMenu');
 
 var designContextMenu = new ej.navigations.ContextMenu({
     animationSettings: { effect: 'None' },
-    items: DropDownDataSources.prototype.getDesignMenuItems(),
+    items: dropDownDataSources.getDesignMenuItems(),
     onOpen: designContextMenuOpen,
     cssClass: "DesignMenu",
     beforeItemRender: beforeItemRender,
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeClose: arrangeMenuBeforeClose
 })
 designContextMenu.appendTo('#designContextMenu');
 
 var toolsContextMenu = new ej.navigations.ContextMenu({
     animationSettings: { effect: 'None' },
-    items: DropDownDataSources.prototype.getToolsMenuItems(),
+    items: dropDownDataSources.getToolsMenuItems(),
     onOpen: toolsContextMenuOpen,
     cssClass: "ToolsMenu",
     beforeItemRender: beforeItemRender,
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeClose: arrangeMenuBeforeClose
 });
 toolsContextMenu.appendTo('#toolsContextMenu');
@@ -3342,7 +3222,7 @@ var btnDesignMenu = new ej.splitbuttons.DropDownButton({
     cssClass: 'db-dropdown-menu',
     target: '.e-contextmenu-wrapper.designMenu',
     content: 'Design',
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeItemRender: beforeItemRender,
     beforeOpen: arrangeMenuBeforeOpen,
     beforeClose: arrangeMenuBeforeClose
@@ -3352,7 +3232,7 @@ var btnToolsMenu = new ej.splitbuttons.DropDownButton({
     cssClass: 'db-dropdown-menu',
     target: '.e-contextmenu-wrapper.toolsMenu',
     content: 'Tools',
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeItemRender: beforeItemRender,
     beforeOpen: arrangeMenuBeforeOpen,
     beforeClose: arrangeMenuBeforeClose
@@ -3363,7 +3243,7 @@ var btnEditMenu = new ej.splitbuttons.DropDownButton({
     cssClass: 'db-dropdown-menu',
     target: '.e-contextmenu-wrapper.editMenu',
     content: 'Edit',
-    select: function (args) { UtilityMethods.prototype.menuClick(args) },
+    select: function (args) { utilityMethods.menuClick(args) },
     beforeItemRender: beforeItemRender,
     beforeOpen: arrangeMenuBeforeOpen,
     beforeClose: arrangeMenuBeforeClose
@@ -3373,6 +3253,12 @@ btnEditMenu.appendTo('#btnEditMenu');
 
 var btnZoomIncrement = new ej.splitbuttons.DropDownButton({ items: zoomMenuItems, content: Math.round(diagram.scrollSettings.currentZoom * 100) + ' %', select: zoomChange });
 btnZoomIncrement.appendTo('#btnZoomIncrement');
+
+conTypeBtn = new ej.splitbuttons.DropDownButton({
+    items: conTypeItems, iconCss:'sf-icon-orthogonal_line',
+    select: function (args) {utilityMethods.onConnectorSelect(args)}
+});
+
 
 
 // Property panel
@@ -3384,7 +3270,7 @@ var printDialog = new ej.popups.Dialog({
     target: document.body,
     isModal: true,
     animationSettings: { effect: 'None' },
-    buttons: UtilityMethods.prototype.getDialogButtons('print'),
+    buttons: utilityMethods.getDialogButtons('print'),
     visible: false,
     showCloseIcon: true,
     content: '<div id="printDialogContent"><div class="row"><div class="row">Region</div> <div class="row db-dialog-child-prop-row">' +
@@ -3401,7 +3287,7 @@ printDialog.appendTo('#printDialog');
 
 // dropdown template for printDialog control
 var printRegionDropdown = new ej.dropdowns.DropDownList({
-    dataSource: DropDownDataSources.prototype.diagramRegions(),
+    dataSource: dropDownDataSources.diagramRegions(),
     fields: { text: 'text', value: 'value' },
     value: printSettings.region
 });
@@ -3409,7 +3295,7 @@ printRegionDropdown.appendTo('#printRegionDropdown');
 
 // dropdown template for printDialog control
 var printPaperSizeDropdown = new ej.dropdowns.DropDownList({
-    dataSource: DropDownDataSources.prototype.paperList(),
+    dataSource: dropDownDataSources.paperList(),
     fields: { text: 'text', value: 'value' },
     value: printSettings.paperSize
 });
@@ -3460,7 +3346,7 @@ var exportDialog = new ej.popups.Dialog({
     target: document.body,
     isModal: true,
     animationSettings: { effect: 'None' },
-    buttons: UtilityMethods.prototype.getDialogButtons('export'),
+    buttons: utilityMethods.getDialogButtons('export'),
     visible: false,
     showCloseIcon: true,
     content: '<div id="exportDialogContent"><div class="row"><div class="row"> File Name </div> <div class="row db-dialog-child-prop-row">' +
@@ -3473,7 +3359,7 @@ var exportDialog = new ej.popups.Dialog({
 exportDialog.appendTo('#exportDialog');
 
 var exportFormat = new ej.dropdowns.DropDownList({
-    dataSource: DropDownDataSources.prototype.fileFormats(),
+    dataSource: dropDownDataSources.fileFormats(),
     fields: { text: 'text', value: 'value' },
     value: exportSettings.format,
 });
@@ -3481,7 +3367,7 @@ exportFormat.appendTo('#exportFormat');
 
 // dropdown template for exportDialog control
 var exportRegion = new ej.dropdowns.DropDownList({
-    dataSource: DropDownDataSources.prototype.diagramRegions(),
+    dataSource: dropDownDataSources.diagramRegions(),
     fields: { text: 'text', value: 'value' },
     value: exportSettings.region
 });

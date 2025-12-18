@@ -1,7 +1,7 @@
-var DropDownDataSources = (function () {
-    function DropDownDataSources() {
+class DropDownDataSources {
+    constructor() {
     };
-    DropDownDataSources.prototype.getFileMenuItems = function()
+    getFileMenuItems ()
     {
             var items = [
                 { text: 'New', iconCss: 'sf-icon-New' },
@@ -11,19 +11,16 @@ var DropDownDataSources = (function () {
                 { separator: true },
                 { text: 'Export', iconCss: 'sf-icon-Export',
                     items:[
-                        {text:'JPG'},{text:'PNG'},{text:'BMP'},{text:'SVG'}
+                        {text:'JPG'},{text:'PNG'},{text:'SVG'}
                     ] },
                 { text: 'Print', iconCss: 'sf-icon-Print' },
         
             ]
             return items;
     };
-    DropDownDataSources.prototype.getEditMenuItems = function()
+    getEditMenuItems ()
     {
         var items = [
-            { text: 'Undo', iconCss: 'sf-icon-undo' },
-            { text: 'Redo', iconCss: 'sf-icon-redo' },
-            { separator: true },
             { text: 'Cut', iconCss: 'sf-icon-cut' },
             { text: 'Copy', iconCss: 'sf-icon-copy' },
             { text: 'Paste', iconCss: 'sf-icon-paste' },
@@ -31,22 +28,13 @@ var DropDownDataSources = (function () {
             { text: 'Rotate',iconCss:'sf-icon-rotate', items:[
                 { text: 'Rotate Right 90', iconCss: 'sf-icon-rotate-clockwise' },
                 { text: 'Rotate Left 90', iconCss: 'sf-icon-rotate-counter-clockwise' },
-                // { text: 'Flip Vertical', iconCss: 'sf-icon-flip-vertical' },
-                // { text: 'Flip Horizontal', iconCss: 'sf-icon-flip-horizontal' },
             ]},
             { text: 'Delete', iconCss: 'sf-icon-delete' },
             { separator: true },
-            // {text: 'Order Commands',iconCss:'sf-icon-Order',
-            //     items:[ { text: 'Bring Forward', iconCss: 'sf-icon-bring-forward' },
-            //             { text: 'Bring To Front', iconCss: 'sf-icon-bring-to-front' },
-            //             { text: 'Send Backward', iconCss: 'sf-icon-send-backward' },
-            //             { text: 'Send To Back', iconCss: 'sf-icon-send-to-back' },
-            //             ]
-            // } 
         ]
         return items;
     };
-    DropDownDataSources.prototype.getDesignMenuItems = function()
+   getDesignMenuItems ()
     {
         var items = [
             { text: 'Orientation',iconCss: 'sf-icon-page_orientation',
@@ -61,7 +49,7 @@ var DropDownDataSources = (function () {
         ]
         return items;
     };
-    DropDownDataSources.prototype.getToolsMenuItems = function()
+    getToolsMenuItems ()
     {
         var items1 = [
             { text: 'Selection Tool',iconCss: 'sf-icon-pointer' },
@@ -75,7 +63,7 @@ var DropDownDataSources = (function () {
         ]
         return items1;
     };
-    DropDownDataSources.prototype.getSelectMenuItems = function()
+    getSelectMenuItems ()
     {
         var items = [
             { text: 'Select All', iconCss: 'em-icons e-cut' },
@@ -85,7 +73,7 @@ var DropDownDataSources = (function () {
         ]
         return items;
     };
-    DropDownDataSources.prototype.getViewMenuItems = function()
+    getViewMenuItems ()
     {
         var items = [
             { text: 'Show Lines',iconCss: 'sf-icon-check-tick'},
@@ -100,7 +88,7 @@ var DropDownDataSources = (function () {
         ]
         return items;
     };
-    DropDownDataSources.prototype.paperList = function()
+    paperList ()
     {
         var paperList = [
             { text: 'Letter (8.5 in x 11 in)', value: 'Letter' }, { text: 'Legal (8.5 in x 14 in)', value: 'Legal' },
@@ -110,7 +98,7 @@ var DropDownDataSources = (function () {
         ];
         return paperList;
     };
-    DropDownDataSources.prototype.paperList1 = function()
+    paperList1 ()
     {
         var paperList1 = [
             { text: 'Letter (8.5 in x 11 in)', value: 'Letter',iconCss:'sf-icon-check-tick' }, { text: 'Legal (8.5 in x 14 in)', value: 'Legal' },
@@ -120,22 +108,22 @@ var DropDownDataSources = (function () {
         ];
         return paperList1;
     };
-    DropDownDataSources.prototype.fileFormats = function()
+    fileFormats ()
     {
         var fileFormats = [
             { text: 'JPG', value: 'JPG' }, { text: 'PNG', value: 'PNG' },
-            { text: 'BMP', value: 'BMP' }, { text: 'SVG', value: 'SVG' }
+            { text: 'SVG', value: 'SVG' }
         ];
         return fileFormats;
     };
-    DropDownDataSources.prototype.diagramRegions = function()
+    diagramRegions ()
     {
         var diagramRegions = [
             { text: 'Content', value: 'Content' }, { text: 'PageSettings', value: 'PageSettings' }
         ];
         return diagramRegions;
     };
-    DropDownDataSources.prototype.borderStyles= function()
+    borderStyles ()
     {
         var borderStyles = [
             { text: '', value: '', className: 'ddl-svg-style ddl_linestyle_none' },
@@ -146,7 +134,7 @@ var DropDownDataSources = (function () {
         ];
         return borderStyles;
     };
-    DropDownDataSources.prototype.gradientDirections = function()
+    gradientDirections ()
     {
         var gradientDirections = [
             { text: 'BottomToTop', value: 'BottomToTop' }, { text: 'TopToBottom', value: 'TopToBottom' },
@@ -154,7 +142,7 @@ var DropDownDataSources = (function () {
         ];
         return gradientDirections;
     };
-    DropDownDataSources.prototype.lineTypes = function()
+    lineTypes ()
     {
         var lineTypes = [
             { text: 'Straight', value: 'Straight' }, { text: 'Orthogonal', value: 'Orthogonal' },
@@ -162,7 +150,7 @@ var DropDownDataSources = (function () {
         ];
         return lineTypes;
     };
-    DropDownDataSources.prototype.decoratorList = function()
+    decoratorList ()
     {
         var decoratorList = [
             { text: 'None', value: 'None' },
@@ -179,7 +167,7 @@ var DropDownDataSources = (function () {
         ];
         return decoratorList;
     };
-    DropDownDataSources.prototype.fontFamilyList = function()
+    fontFamilyList ()
     {
         var fontFamilyList = [
             { text: 'Arial', value: 'Arial' },
@@ -192,7 +180,7 @@ var DropDownDataSources = (function () {
         ];
         return fontFamilyList;
     };
-    DropDownDataSources.prototype.textPositionDataSource = function()
+    textPositionDataSource ()
     {
         var textPosition = [
             { text: 'TopLeft', value: 'TopLeft' }, { text: 'TopCenter', value: 'TopCenter' },
@@ -203,26 +191,23 @@ var DropDownDataSources = (function () {
         ];
         return textPosition;
     };
-    DropDownDataSources.prototype.toolbarItems = function()
+    toolbarItems ()
     {
         let items = [
-            { prefixIcon: 'sf-icon-undo tb-icons', tooltipText: 'Undo',cssClass: 'tb-item-start tb-item-undo' },
-            { prefixIcon: 'sf-icon-redo tb-icons', tooltipText: 'Redo',cssClass: 'tb-item-end tb-item-redo' },
-                            { type: 'Separator' },
             { prefixIcon: 'sf-icon-pan', tooltipText: 'Pan Tool',cssClass:'tb-item-start'},
             { prefixIcon: 'sf-icon-pointer', tooltipText: 'Select Tool',cssClass:'tb-item-middle tb-item-selected'},
+            { separator: true },
+            { tooltipText: 'Change Connector Type',template: '<button id="conTypeBtn" style="width:100%;"></button>',cssClass:'tb-item-middle'},
             { type: 'Separator' },
             {
                 template: ' <div class="db-text-container" style="margin-left:10px;"><div class="db-text-input"><input id="numeric" type="text" style="margin-left:10px;" /></div></div>', visible: false, tooltipText: 'Signal Duration(ms)'
             },
-            // {
-            //     type: 'Separator',template:'<div style="margin-left:1000px;"></div>'
-            // },
             {
                 cssClass: 'tb-item-end tb-zoom-dropdown-btn', template: '<button id="btnZoomIncrement"></button>',align:'Right'
             },
         ];
         return items;
     };
-    return DropDownDataSources;
-}());
+
+};
+module.exports = DropDownDataSources;
